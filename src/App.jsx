@@ -1,122 +1,127 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { MEMBERS, LANES } from './constants'
+import { generateTeams } from './teamLogic'
+import MemberCard from './components/MemberCard'
+import TeamResult from './components/TeamResult'
+import styles from './App.module.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const MAX_PLAYERS = 10
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function initState() {
+  const s = {}
+  MEMBERS.forEach(m => { s[m] = { checked: false, lanes: [] } })
+  return s
 }
 
-export default App
+export default function App() {
+  const [memberState, setMemberState] = useState(initState)
+  const [teams, setTeams] = useState(null)
+  const [error, setError] = useState('')
+
+  const selectedCount = MEMBERS.filter(m => memberState[m].checked).length
+
+  function toggleMember(name) {
+    setMemberState(prev => {
+      const s = { ...prev, [name]: { ...prev[name] } }
+      s[name].checked = !s[name].checked
+      if (!s[name].checked) s[name].lanes = []
+      return s
+    })
+    setTeams(null)
+    setError('')
+  }
+
+  function toggleLane(name, lane) {
+    setMemberState(prev => {
+      const lanes = [...prev[name].lanes]
+      const idx = lanes.indexOf(lane)
+      if (idx === -1) lanes.push(lane)
+      else lanes.splice(idx, 1)
+      return { ...prev, [name]: { ...prev[name], lanes } }
+    })
+  }
+
+  function handleGenerate() {
+    setError('')
+    if (selectedCount === 0) {
+      setError('参加者を1人以上選択してください。')
+      return
+    }
+
+    const players = MEMBERS
+      .filter(m => memberState[m].checked)
+      .map(m => ({
+        name: m,
+        // 希望レーン未選択の場合は全レーン対応（Fill）扱い
+        lanes: memberState[m].lanes.length > 0 ? [...memberState[m].lanes] : [...LANES],
+        isCpu: false,
+      }))
+
+    // CPU補填
+    const need = MAX_PLAYERS - players.length
+    for (let i = 1; i <= need; i++) {
+      players.push({ name: `CPU ${i}`, lanes: [...LANES], isCpu: true })
+    }
+
+    const result = generateTeams(players)
+    setTeams(result)
+  }
+
+  return (
+    <div className={styles.app}>
+      {/* ヘッダー */}
+      <header className={styles.header}>
+        <h1 className={styles.title}>
+          
+          {' '}Doran's Ring チーム分けツール{' '}
+          
+        </h1>
+        <p className={styles.subtitle}>
+          参加メンバーを選んでレーン希望を入力してね
+        </p>
+      </header>
+
+      {/* メンバー選択 */}
+      <section className={styles.card}>
+        <p className={styles.sectionLabel}>参加メンバー選択</p>
+        <p className={styles.counter}>
+          選択中: <strong>{selectedCount}</strong> / {MAX_PLAYERS}人
+          {selectedCount > 0 && selectedCount < MAX_PLAYERS && (
+            <span className={styles.cpuNote}>
+              　→ CPU {MAX_PLAYERS - selectedCount}人で補填します
+            </span>
+          )}
+        </p>
+        <div className={styles.memberGrid}>
+          {MEMBERS.map(name => (
+            <MemberCard
+              key={name}
+              name={name}
+              checked={memberState[name].checked}
+              lanes={memberState[name].lanes}
+              disabled={!memberState[name].checked && selectedCount >= MAX_PLAYERS}
+              onToggleCheck={() => toggleMember(name)}
+              onToggleLane={lane => toggleLane(name, lane)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* 生成ボタン */}
+      <div className={styles.generateArea}>
+        {error && <p className={styles.error}>{error}</p>}
+        <button
+          className={styles.generateBtn}
+          onClick={handleGenerate}
+          disabled={selectedCount === 0}
+          type="button"
+        >
+          チームを生成する
+        </button>
+      </div>
+
+      {/* 結果表示 */}
+      <TeamResult teams={teams} onReroll={handleGenerate} />
+    </div>
+  )
+}

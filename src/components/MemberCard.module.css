@@ -1,0 +1,74 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.selected {
+  border-color: var(--gold-border);
+  background: var(--gold-light);
+}
+
+.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.laneRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-left: 23px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 0.5px solid var(--border-hover);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.04em;
+}
+
+.chip:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.chipOn {
+  border-color: transparent;
+}
