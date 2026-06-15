@@ -41,31 +41,38 @@ export default function App() {
     })
   }
 
-  function handleGenerate() {
-    setError('')
-    if (selectedCount === 0) {
-      setError('参加者を1人以上選択してください。')
-      return
-    }
-
-    const players = MEMBERS
-      .filter(m => memberState[m].checked)
-      .map(m => ({
-        name: m,
-        // 希望レーン未選択の場合は全レーン対応（Fill）扱い
-        lanes: memberState[m].lanes.length > 0 ? [...memberState[m].lanes] : [...LANES],
-        isCpu: false,
-      }))
-
-    // CPU補填
-    const need = MAX_PLAYERS - players.length
-    for (let i = 1; i <= need; i++) {
-      players.push({ name: `CPU ${i}`, lanes: [...LANES], isCpu: true })
-    }
-
-    const result = generateTeams(players)
-    setTeams(result)
+function handleGenerate() {
+  setError('')
+  if (selectedCount === 0) {
+    setError('参加者を1人以上選択してください。')
+    return
   }
+
+  // 希望レーン未選択のメンバーを確認
+  const noLaneMembers = MEMBERS.filter(
+    m => memberState[m].checked && memberState[m].lanes.length === 0
+  )
+  if (noLaneMembers.length > 0) {
+    setError(`希望レーンを1か所以上選択してください（未選択: ${noLaneMembers.join('、')}）`)
+    return
+  }
+
+  const players = MEMBERS
+    .filter(m => memberState[m].checked)
+    .map(m => ({
+      name: m,
+      lanes: [...memberState[m].lanes],
+      isCpu: false,
+    }))
+
+  const need = MAX_PLAYERS - players.length
+  for (let i = 1; i <= need; i++) {
+    players.push({ name: `CPU ${i}`, lanes: [...LANES], isCpu: true })
+  }
+
+  const result = generateTeams(players)
+  setTeams(result)
+}
 
   return (
     <div className={styles.app}>
