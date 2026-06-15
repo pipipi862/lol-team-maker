@@ -23,14 +23,13 @@ export default function MemberCard({ name, checked, lanes, onToggleCheck, onTogg
             const active = lanes.includes(lane)
             return (
               <button
-                key={lane}
-                className={`${styles.chip} ${active ? styles.chipOn : ''}`}
-                style={active ? { background: LANE_COLORS[lane], color: lane === 'MID' ? '#1a1a1a' : '#fff' } : {}}
-                onClick={() => onToggleLane(lane)}
-                type="button"
-              >
-                {lane}
-              </button>
+  key={lane}
+  className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+  onClick={() => onToggleLane(lane)}
+  type="button"
+>
+  {lane}
+</button>
             )
           })}
         </div>
