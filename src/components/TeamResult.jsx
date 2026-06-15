@@ -8,9 +8,6 @@ export default function TeamResult({ teams, onReroll }) {
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <p className={styles.label}>チーム分け結果</p>
-        <button className={styles.rerollBtn} onClick={onReroll} type="button">
-          再抽選
-        </button>
       </div>
 
       <div className={styles.grid}>
