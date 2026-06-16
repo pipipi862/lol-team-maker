@@ -2,7 +2,10 @@ import { LANES, LANE_ORDER } from './constants'
 
 export function generateTeams(players) {
   const humans = players.filter(p => !p.isCpu)
-  const cpus = players.filter(p => p.isCpu)
+  // CPUに一時IDを付与（名前が全員"AI"で重複するため）
+  const cpus = players
+    .filter(p => p.isCpu)
+    .map((p, i) => ({ ...p, _id: `cpu_${i}` }))
 
   // ── 1. 希望レーンが1つのメンバーをレーンごとに集計 ──
   const confirmedBlue = []
@@ -47,7 +50,7 @@ export function generateTeams(players) {
     }
   }
 
-  // ── 3. 未配置プレイヤーをすべて集める ──
+  // ── 3. 未配置の人間を集める ──
   const assignedNames = new Set([
     ...teams.Blue.map(p => p.name),
     ...teams.Red.map(p => p.name),
@@ -55,63 +58,53 @@ export function generateTeams(players) {
   const unplacedHumans = humans
     .filter(p => !assignedNames.has(p.name))
     .sort(() => Math.random() - 0.5)
-  const shuffledCpus = [...cpus].sort(() => Math.random() - 0.5)
 
-  // ── 4. 人間が偶数のとき、Blue/Redの人間数を均等にする ──
-  // 確定配置済みの人間数を考慮して残り人間を均等振り分け
-  const humanBlueCount = teams.Blue.filter(p => !p.isCpu).length
-  const humanRedCount = teams.Red.filter(p => !p.isCpu).length
-  const remainingHumans = unplacedHumans.length
   const totalHumans = humans.length
+  const humanBlueConfirmed = teams.Blue.length
+  const humanRedConfirmed = teams.Red.length
 
+  // ── 4. 人間の振り分け ──
+  // 偶数: 均等（n vs n）、奇数: n vs n+1
   let humanForBlue = []
   let humanForRed = []
 
-  if (totalHumans % 2 === 0) {
-    // 偶数: Blue/Redの人間数を均等に
-    const targetPerSide = totalHumans / 2
-    const blueNeedsHuman = targetPerSide - humanBlueCount
-    const redNeedsHuman = targetPerSide - humanRedCount
-    humanForBlue = unplacedHumans.slice(0, Math.max(0, blueNeedsHuman))
-    humanForRed = unplacedHumans.slice(
-      Math.max(0, blueNeedsHuman),
-      Math.max(0, blueNeedsHuman) + Math.max(0, redNeedsHuman)
-    )
-    // 端数があれば残りに追加
-    const distributed = humanForBlue.length + humanForRed.length
-    const leftoverHumans = unplacedHumans.slice(distributed)
-    leftoverHumans.forEach((p, i) => {
-      if (i % 2 === 0) humanForBlue.push(p)
-      else humanForRed.push(p)
-    })
-  } else {
-    // 奇数: 交互に振り分け
-    unplacedHumans.forEach((p, i) => {
-      if (i % 2 === 0) humanForBlue.push(p)
-      else humanForRed.push(p)
-    })
+  const targetBlue = Math.floor(totalHumans / 2)
+  const targetRed = Math.ceil(totalHumans / 2)
+
+  const blueNeedsHuman = Math.max(0, targetBlue - humanBlueConfirmed)
+  const redNeedsHuman = Math.max(0, targetRed - humanRedConfirmed)
+
+  humanForBlue = unplacedHumans.slice(0, blueNeedsHuman)
+  humanForRed = unplacedHumans.slice(blueNeedsHuman, blueNeedsHuman + redNeedsHuman)
+
+  // 端数（確定配置で偏った場合）は枠が少ない方に追加
+  const leftoverHumans = unplacedHumans.slice(blueNeedsHuman + redNeedsHuman)
+  for (const p of leftoverHumans) {
+    const blueTotal = humanBlueConfirmed + humanForBlue.length
+    const redTotal = humanRedConfirmed + humanForRed.length
+    if (blueTotal <= redTotal) humanForBlue.push(p)
+    else humanForRed.push(p)
   }
 
-  // ── 5. CPUをBlue/Redの残り枠に均等振り分け ──
-  const blueHumanTotal = teams.Blue.length + humanForBlue.length
-  const redHumanTotal = teams.Red.length + humanForRed.length
-  const cpuForBlue = []
-  const cpuForRed = []
-  const cpuHalf = Math.floor(shuffledCpus.length / 2)
-  const swapCpu = Math.random() < 0.5
+  // ── 5. CPUを残り枠に振り分け ──
+  const blueSlots = 5 - (humanBlueConfirmed + humanForBlue.length)
+  const redSlots = 5 - (humanRedConfirmed + humanForRed.length)
 
+  const shuffledCpus = [...cpus].sort(() => Math.random() - 0.5)
+  const swapCpu = Math.random() < 0.5
+  const cpuHalf = Math.floor(shuffledCpus.length / 2)
   const cpuA = swapCpu ? shuffledCpus.slice(cpuHalf) : shuffledCpus.slice(0, cpuHalf)
   const cpuB = swapCpu ? shuffledCpus.slice(0, cpuHalf) : shuffledCpus.slice(cpuHalf)
 
-  const blueSlots = 5 - blueHumanTotal
-  const redSlots = 5 - redHumanTotal
+  const cpuForBlue = cpuA.slice(0, blueSlots)
+  const cpuForRed = cpuB.slice(0, redSlots)
 
-  cpuA.slice(0, blueSlots).forEach(p => cpuForBlue.push(p))
-  cpuB.slice(0, redSlots).forEach(p => cpuForRed.push(p))
-
-  // 振り分けきれなかったCPUを残り枠に追加
-  const distributedCpu = new Set([...cpuForBlue.map(p => p.name), ...cpuForRed.map(p => p.name)])
-  const leftoverCpu = shuffledCpus.filter(p => !distributedCpu.has(p.name))
+  // 振り分けきれなかったCPUを残り枠に追加（_idで重複管理）
+  const distributedIds = new Set([
+    ...cpuForBlue.map(p => p._id),
+    ...cpuForRed.map(p => p._id),
+  ])
+  const leftoverCpu = shuffledCpus.filter(p => !distributedIds.has(p._id))
   for (const p of leftoverCpu) {
     if (cpuForBlue.length < blueSlots) cpuForBlue.push(p)
     else if (cpuForRed.length < redSlots) cpuForRed.push(p)
@@ -157,7 +150,7 @@ export function generateTeams(players) {
     }
   }
 
-  // ── 7. フェイルセーフ: 5人未満なら強制補填 ──
+  // ── 7. フェイルセーフ ──
   for (const side of ['Blue', 'Red']) {
     while (teams[side].length < 5) {
       const rest = LANES.filter(l => !usedLanes[side].has(l))
@@ -167,8 +160,9 @@ export function generateTeams(players) {
     }
   }
 
-  // ── 8. レーン順にソート ──
+  // ── 8. _id除去 & レーン順ソート ──
   for (const side of ['Blue', 'Red']) {
+    teams[side] = teams[side].map(({ _id, ...p }) => p)
     teams[side].sort(
       (a, b) => LANE_ORDER.indexOf(a.lane) - LANE_ORDER.indexOf(b.lane)
     )
