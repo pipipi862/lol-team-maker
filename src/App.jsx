@@ -90,7 +90,7 @@ for (let i = 0; i < need; i++) {
         <h1 className={styles.title}>
           <img src="./ring.png" alt="" className={styles.titleIcon} />
           {' '}Doran's Ring チーム分けツール{' '}
-          <img src="./garen.jpg" alt="" className={styles.titleIcon} />
+          <img src="./teemo.png" alt="" className={styles.titleIcon} />
         </h1>
         <p className={styles.subtitle}>
           参加メンバーと希望レーンを選択してね

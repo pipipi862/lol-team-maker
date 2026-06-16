@@ -92,6 +92,9 @@ export default function TeamResult({ teams: initialTeams }) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
+        <p className={styles.garentext}>\ ジャスティース!! /</p>
+          <img src="./garen.jpg" alt="ガレン" className={styles.resultGaren} />
+          
         <p className={styles.label}>チーム分け結果</p>
         <p className={styles.hint}>・ドラッグ＆ドロップでメンバーを入れ替えできます（スマホ不可）</p>
       </div>
