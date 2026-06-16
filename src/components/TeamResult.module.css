@@ -3,34 +3,15 @@
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-bottom: 10px;
 }
 
 .label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.rerollBtn {
-  font-size: 12px;
-  padding: 5px 14px;
-  background: transparent;
-  border: 0.5px solid var(--border-hover);
-  color: var(--text-secondary);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.rerollBtn:hover {
-  background: var(--bg-card);
-  color: var(--text-primary);
 }
 
 .grid {
@@ -89,7 +70,7 @@
 }
 
 .laneBadge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   width: 34px;
   text-align: center;
@@ -100,11 +81,32 @@
 }
 
 .playerName {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-primary);
 }
 
 .cpu {
   color: var(--text-muted);
   font-style: italic;
+}
+
+.copyBtn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  background: transparent;
+  border: 0.5px solid var(--border-hover);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.copyBtn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
 }

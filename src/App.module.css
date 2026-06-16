@@ -1,26 +1,33 @@
-.app {
-  padding-bottom: 4rem;
-}
-
 .header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
 .title {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 20px;
   font-weight: 500;
   color: var(--text-primary);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   margin-bottom: 6px;
 }
 
+.titleIcon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 3px;
+}
 .gold {
   color: var(--gold);
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -33,7 +40,7 @@
 }
 
 .sectionLabel {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
@@ -42,7 +49,7 @@
 }
 
 .counter {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-secondary);
   margin-bottom: 14px;
 }
@@ -100,4 +107,42 @@
 .generateBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.footer {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.footerMain {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.footerSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.notes {
+  margin-top: 1rem;
+  padding: 0.875rem 1rem 0.875rem 1.75rem;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  list-style: disc;
+  text-align: left;
+}
+
+.notes li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+.notes li + li {
+  margin-top: 4px;
 }

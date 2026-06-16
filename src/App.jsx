@@ -66,9 +66,9 @@ function handleGenerate() {
     }))
 
   const need = MAX_PLAYERS - players.length
-  for (let i = 1; i <= need; i++) {
-    players.push({ name: `CPU ${i}`, lanes: [...LANES], isCpu: true })
-  }
+for (let i = 1; i <= need; i++) {
+  players.push({ name: 'AI', lanes: [...LANES], isCpu: true })
+}
 
   const result = generateTeams(players)
   setTeams(result)
@@ -79,13 +79,17 @@ function handleGenerate() {
       {/* ヘッダー */}
       <header className={styles.header}>
         <h1 className={styles.title}>
-          
+          <img src="./ring.png" alt="" className={styles.titleIcon} />
           {' '}Doran's Ring チーム分けツール{' '}
-          
+          <img src="./ring.png" alt="" className={styles.titleIcon} />
         </h1>
         <p className={styles.subtitle}>
-          参加メンバーを選んでレーン希望を入力してね
+          参加メンバーと希望レーンを選択してね
         </p>
+        <ul className={styles.notes}>
+  <li>希望レーンを1箇所のみ選択した場合、原則としてそのレーンに優先配置されます。</li>
+  <li>希望レーンが1箇所のメンバーが3人以上の場合は、ランダムで2名が希望レーンに配属され、残りのメンバーは他レーンへ配置されます。</li>
+</ul>
       </header>
 
       {/* メンバー選択 */}
@@ -95,7 +99,7 @@ function handleGenerate() {
           選択中: <strong>{selectedCount}</strong> / {MAX_PLAYERS}人
           {selectedCount > 0 && selectedCount < MAX_PLAYERS && (
             <span className={styles.cpuNote}>
-              　→ CPU {MAX_PLAYERS - selectedCount}人で補填します
+              　→ AI {MAX_PLAYERS - selectedCount}人で補填します
             </span>
           )}
         </p>
@@ -129,6 +133,11 @@ function handleGenerate() {
 
       {/* 結果表示 */}
       <TeamResult teams={teams} onReroll={handleGenerate} />
+
+<footer className={styles.footer}>
+        <p className={styles.footerMain}>今日も元気にリーグオブレジェンド</p>
+        <p className={styles.footerSub}>Powered by Doran's Ring</p>
+      </footer>
     </div>
   )
 }

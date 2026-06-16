@@ -1,8 +1,32 @@
+import { useState } from 'react'
 import { LANE_COLORS } from '../constants'
 import styles from './TeamResult.module.css'
 
-export default function TeamResult({ teams, onReroll }) {
+export default function TeamResult({ teams }) {
+  const [copied, setCopied] = useState(false)
+
   if (!teams) return null
+
+  function handleCopy() {
+    const LANE_ORDER = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
+    const lines = []
+
+    for (const side of ['Blue', 'Red']) {
+      lines.push(`【${side === 'Blue' ? '🔵 Blue' : '🔴 Red'} チーム】`)
+      const sorted = [...teams[side]].sort(
+        (a, b) => LANE_ORDER.indexOf(a.lane) - LANE_ORDER.indexOf(b.lane)
+      )
+      for (const p of sorted) {
+        lines.push(`  ${p.lane.padEnd(3)}  ${p.name}`)
+      }
+      lines.push('')
+    }
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -37,6 +61,10 @@ export default function TeamResult({ teams, onReroll }) {
           </div>
         ))}
       </div>
+
+      <button className={styles.copyBtn} onClick={handleCopy} type="button">
+        {copied ? '✓ コピーしました' : 'クリップボードにコピー'}
+      </button>
     </div>
   )
 }
