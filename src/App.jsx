@@ -139,7 +139,7 @@ for (let i = 0; i < need; i++) {
           disabled={selectedCount === 0}
           type="button"
         >
-          チームを生成する
+          チーム分けを実行する
         </button>
       </div>
 
