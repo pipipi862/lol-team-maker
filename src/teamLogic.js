@@ -49,98 +49,92 @@ export function generateTeams(players) {
     }
   }
 
-  // ── 3. 残りの人間をプールに集める ──
+  // ── 3. 残りの人間・CPUをプールに集める ──
   const flexHumans = humans
     .filter(p => !confirmedNames.has(p.name) || overflowSet.has(p.name))
     .sort(() => Math.random() - 0.5)
 
-  // ── 4. CPUをhalf/halfに振り分け ──
   const shuffledCpus = [...cpus].sort(() => Math.random() - 0.5)
-  const cpuHalf = Math.floor(cpus.length / 2)
-  const swapCpu = Math.random() < 0.5
-  const cpuBlue = swapCpu ? shuffledCpus.slice(cpuHalf) : shuffledCpus.slice(0, cpuHalf)
-  const cpuRed = swapCpu ? shuffledCpus.slice(0, cpuHalf) : shuffledCpus.slice(cpuHalf)
 
-  // ── 5. 残り枠を計算して人間・CPUを振り分け ──
+  // ── 4. Blue/Redの残り枠を計算 ──
   const blueRemain = 5 - teams.Blue.length
   const redRemain = 5 - teams.Red.length
 
-  const cpuBlueCount = Math.min(cpuBlue.length, blueRemain)
-  const cpuRedCount = Math.min(cpuRed.length, redRemain)
-  const humanBlueCount = blueRemain - cpuBlueCount
-  const humanRedCount = redRemain - cpuRedCount
+  // CPUをBlue/Redに振り分け（奇数はランダムで±1）
+  const cpuHalf = Math.floor(shuffledCpus.length / 2)
+  const swapCpu = Math.random() < 0.5
+  const cpuForBlue = (swapCpu ? shuffledCpus.slice(cpuHalf) : shuffledCpus.slice(0, cpuHalf))
+  const cpuForRed = (swapCpu ? shuffledCpus.slice(0, cpuHalf) : shuffledCpus.slice(cpuHalf))
 
-  const humanForBlue = flexHumans.slice(0, humanBlueCount)
-  const humanForRed = flexHumans.slice(humanBlueCount, humanBlueCount + humanRedCount)
+  // 人間をBlue/Redに振り分け
+  const humanForBlue = flexHumans.slice(0, blueRemain - Math.min(cpuForBlue.length, blueRemain))
+  const humanForRed = flexHumans.slice(humanForBlue.length, humanForBlue.length + (redRemain - Math.min(cpuForRed.length, redRemain)))
 
-  // ── 6. CPU補填あり・人間が偶数のとき、対面レーン保証 ──
-  // 確定済みレーンを除いた残りレーンでペアを作り、
-  // 人間を片方・AIをもう片方に配置する
+  // Blue/Redそれぞれのフレキシブルプール（人間+CPU）
+  // CPU数が枠を超えないよう調整
+  const blueFlexPool = [
+    ...humanForBlue,
+    ...cpuForBlue.slice(0, blueRemain - humanForBlue.length),
+  ]
+  const redFlexPool = [
+    ...humanForRed,
+    ...cpuForRed.slice(0, redRemain - humanForRed.length),
+  ]
+
+  // ── 5. CPU補填あり・人間が偶数のとき対面レーン保証 ──
   if (hasCpu && humanCount % 2 === 0) {
     const pairedLanes = LANES.filter(
       l => !usedLanes.Blue.has(l) && !usedLanes.Red.has(l)
     )
 
-    // 残り人間フレキシブルをBlue/Redに振り分け済みのものを使って
-    // 対面レーンにペア配置する
-    const humanBluePool = [...humanForBlue]
-    const humanRedPool = [...humanForRed]
-    const cpuBluePool = cpuBlue.slice(0, cpuBlueCount)
-    const cpuRedPool = cpuRed.slice(0, cpuRedCount)
-
     for (const lane of pairedLanes) {
       if (teams.Blue.length >= 5 || teams.Red.length >= 5) break
 
-      // Blueに人間、Redに人間 or CPU のペアを置く
-      const blueHuman = humanBluePool.find(p =>
-        p.lanes.includes(lane) && !usedLanes.Blue.has(lane)
-      )
-      const redHuman = humanRedPool.find(p =>
-        p.lanes.includes(lane) && !usedLanes.Red.has(lane)
-      )
-      const blueCpu = cpuBluePool.find(() => !usedLanes.Blue.has(lane))
-      const redCpu = cpuRedPool.find(() => !usedLanes.Red.has(lane))
+      const blueIdx = blueFlexPool.findIndex(p => p.lanes.includes(lane))
+      const redIdx = redFlexPool.findIndex(p => p.lanes.includes(lane))
 
-      const bluePlayer = blueHuman ?? blueCpu ?? null
-      const redPlayer = redHuman ?? redCpu ?? null
-
-      if (bluePlayer && redPlayer && teams.Blue.length < 5 && teams.Red.length < 5) {
-        if (!usedLanes.Blue.has(lane)) {
-          usedLanes.Blue.add(lane)
-          teams.Blue.push({ ...bluePlayer, lane })
-          if (blueHuman) humanBluePool.splice(humanBluePool.indexOf(blueHuman), 1)
-          else cpuBluePool.splice(cpuBluePool.indexOf(bluePlayer), 1)
-        }
-        if (!usedLanes.Red.has(lane)) {
-          usedLanes.Red.add(lane)
-          teams.Red.push({ ...redPlayer, lane })
-          if (redHuman) humanRedPool.splice(humanRedPool.indexOf(redHuman), 1)
-          else cpuRedPool.splice(cpuRedPool.indexOf(redPlayer), 1)
-        }
+      // 両チームに配置できる候補がいる場合のみペア配置
+      if (blueIdx !== -1 && redIdx !== -1) {
+        const bluePlayer = blueFlexPool.splice(blueIdx, 1)[0]
+        const redPlayer = redFlexPool.splice(redIdx, 1)[0]
+        usedLanes.Blue.add(lane)
+        usedLanes.Red.add(lane)
+        teams.Blue.push({ ...bluePlayer, lane })
+        teams.Red.push({ ...redPlayer, lane })
       }
     }
-
-    // 対面保証後の残りを通常割り当て
-    const remainBlue = [...humanBluePool, ...cpuBluePool].filter(
-      p => !teams.Blue.some(t => t.name === p.name)
-    )
-    const remainRed = [...humanRedPool, ...cpuRedPool].filter(
-      p => !teams.Red.some(t => t.name === p.name)
-    )
-
-    assignFlex(remainBlue, 'Blue', teams, usedLanes)
-    assignFlex(remainRed, 'Red', teams, usedLanes)
-  } else {
-    // 通常割り当て
-    const groups = {
-      Blue: [...humanForBlue, ...cpuBlue.slice(0, cpuBlueCount)],
-      Red: [...humanForRed, ...cpuRed.slice(0, cpuRedCount)],
-    }
-    assignFlex(groups.Blue, 'Blue', teams, usedLanes)
-    assignFlex(groups.Red, 'Red', teams, usedLanes)
   }
 
-  // ── 7. レーン順にソート ──
+  // ── 6. 残りをフレキシブル割り当て ──
+  // すでに配置済みのメンバーを除いて割り当て
+  const remainBlue = blueFlexPool.filter(p => !teams.Blue.some(t => t.name === p.name))
+  const remainRed = redFlexPool.filter(p => !teams.Red.some(t => t.name === p.name))
+
+  assignFlex(remainBlue, 'Blue', teams, usedLanes)
+  assignFlex(remainRed, 'Red', teams, usedLanes)
+
+  // ── 7. それでも5人未満なら残プールから強制補填 ──
+  // （どのプールにも入らなかったプレイヤーを拾う）
+  const allAssigned = new Set([
+    ...teams.Blue.map(p => p.name),
+    ...teams.Red.map(p => p.name),
+  ])
+  const leftover = players.filter(p => !allAssigned.has(p.name))
+
+  for (const side of ['Blue', 'Red']) {
+    while (teams[side].length < 5 && leftover.length > 0) {
+      const p = leftover.shift()
+      const rest = LANES.filter(l => !usedLanes[side].has(l))
+      if (rest.length === 0) continue
+      const preferred = rest.filter(l => p.lanes.includes(l))
+      const lane = preferred.length > 0 ? pickRandom(preferred) : pickRandom(rest)
+      usedLanes[side].add(lane)
+      const laneUnmatched = !p.lanes.includes(lane)
+      teams[side].push({ ...p, lane, laneUnmatched })
+    }
+  }
+
+  // ── 8. レーン順にソート ──
   for (const side of ['Blue', 'Red']) {
     teams[side].sort(
       (a, b) => LANE_ORDER.indexOf(a.lane) - LANE_ORDER.indexOf(b.lane)
@@ -152,7 +146,7 @@ export function generateTeams(players) {
 
 function assignFlex(pool, side, teams, usedLanes) {
   const unassigned = []
-  let remaining = [...pool]
+  const remaining = [...pool]
 
   while (remaining.length > 0) {
     remaining.sort((a, b) => {
@@ -179,7 +173,8 @@ function assignFlex(pool, side, teams, usedLanes) {
     const preferred = rest.filter(l => p.lanes.includes(l))
     const lane = preferred.length > 0 ? pickRandom(preferred) : pickRandom(rest)
     usedLanes[side].add(lane)
-    teams[side].push({ ...p, lane })
+    const laneUnmatched = !p.lanes.includes(lane)
+    teams[side].push({ ...p, lane, laneUnmatched })
   }
 }
 

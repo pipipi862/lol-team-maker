@@ -90,7 +90,7 @@ for (let i = 1; i <= need; i++) {
         <h1 className={styles.title}>
           <img src="./ring.png" alt="" className={styles.titleIcon} />
           {' '}Doran's Ring チーム分けツール{' '}
-          <img src="./ring.png" alt="" className={styles.titleIcon} />
+          <img src="./garen.jpg" alt="" className={styles.titleIcon} />
         </h1>
         <p className={styles.subtitle}>
           参加メンバーと希望レーンを選択してね
@@ -98,6 +98,8 @@ for (let i = 1; i <= need; i++) {
         <ul className={styles.notes}>
   <li>希望レーンを1箇所のみ選択した場合、原則としてそのレーンに優先配置されます。</li>
   <li>希望レーンが1箇所のメンバーが3人以上の場合は、ランダムで2名が希望レーンに配属され、残りのメンバーは他レーンへ配置されます。</li>
+  <li>参加人数が10人未満の時は、AIが補填されます。</li>
+  <li>チーム分け後、手動でメンバーの入れ替えが可能です。</li>
 </ul>
       </header>
 
