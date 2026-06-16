@@ -40,6 +40,15 @@ export default function App() {
       return { ...prev, [name]: { ...prev[name], lanes } }
     })
   }
+  function selectAllLanes(name) {
+  setMemberState(prev => ({
+    ...prev,
+    [name]: {
+      ...prev[name],
+      lanes: prev[name].lanes.length === LANES.length ? [] : [...LANES],
+    },
+  }))
+}
 
 function handleGenerate() {
   setError('')
@@ -106,14 +115,15 @@ for (let i = 1; i <= need; i++) {
         <div className={styles.memberGrid}>
           {MEMBERS.map(name => (
             <MemberCard
-              key={name}
-              name={name}
-              checked={memberState[name].checked}
-              lanes={memberState[name].lanes}
-              disabled={!memberState[name].checked && selectedCount >= MAX_PLAYERS}
-              onToggleCheck={() => toggleMember(name)}
-              onToggleLane={lane => toggleLane(name, lane)}
-            />
+  key={name}
+  name={name}
+  checked={memberState[name].checked}
+  lanes={memberState[name].lanes}
+  disabled={!memberState[name].checked && selectedCount >= MAX_PLAYERS}
+  onToggleCheck={() => toggleMember(name)}
+  onToggleLane={lane => toggleLane(name, lane)}
+  onSelectAll={() => selectAllLanes(name)}
+/>
           ))}
         </div>
       </section>

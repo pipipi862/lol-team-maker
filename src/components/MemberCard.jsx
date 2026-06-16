@@ -1,7 +1,9 @@
 import { LANES } from '../constants'
 import styles from './MemberCard.module.css'
 
-export default function MemberCard({ name, checked, lanes, onToggleCheck, onToggleLane, disabled }) {
+export default function MemberCard({ name, checked, lanes, onToggleCheck, onToggleLane, onSelectAll, disabled }) {
+  const allSelected = LANES.every(l => lanes.includes(l))
+
   return (
     <div
       className={`${styles.card} ${checked ? styles.selected : ''} ${disabled ? styles.disabled : ''}`}
@@ -23,6 +25,15 @@ export default function MemberCard({ name, checked, lanes, onToggleCheck, onTogg
         >
           {name}
         </label>
+        {checked && (
+          <button
+            className={`${styles.allBtn} ${allSelected ? styles.allBtnOn : ''}`}
+            onClick={e => { e.stopPropagation(); onSelectAll() }}
+            type="button"
+          >
+            全選択
+          </button>
+        )}
       </div>
 
       {checked && (
