@@ -7,11 +7,17 @@
 }
 
 .label {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.hint {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-top: 3px;
 }
 
 .grid {
@@ -67,10 +73,33 @@
   gap: 10px;
   padding: 9px 14px;
   border-top: 0.5px solid var(--border);
+  cursor: grab;
+  transition: background 0.1s, opacity 0.1s;
+  user-select: none;
+}
+
+.playerRow:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: 0.35;
+}
+
+.dragOver {
+  background: rgba(200, 155, 60, 0.1);
+  border-top-color: var(--gold);
+}
+
+.dragHandle {
+  font-size: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  cursor: grab;
 }
 
 .laneBadge {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   width: 34px;
   text-align: center;

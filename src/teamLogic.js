@@ -77,22 +77,22 @@ export function generateTeams(players) {
   }
 
   // ── 6. フレキシブルメンバーのレーン割り当て ──
-  // 希望レーンが競合した場合に備え、複数パスで割り当てる
   for (const side of ['Blue', 'Red']) {
-    const members = [...groups[side]]
-
-    // パス1: 希望レーンが1つだけ空いているメンバーを優先
-    const getAvailable = (p) =>
-      p.lanes.filter(l => !usedLanes[side].has(l))
-
-    // 希望の空き数が少ない順に並べて優先割り当て（競合を減らす）
-    const sorted = members.sort((a, b) =>
-      getAvailable(a).length - getAvailable(b).length
-    )
-
+    // 希望レーンの空き数が少ない順に毎回再ソートして割り当て
+    const pool = [...groups[side]]
     const unassigned = []
-    for (const p of sorted) {
-      const available = getAvailable(p)
+
+    while (pool.length > 0) {
+      // 現時点での空き希望数を再計算してソート
+      pool.sort((a, b) => {
+        const aAvail = a.lanes.filter(l => !usedLanes[side].has(l)).length
+        const bAvail = b.lanes.filter(l => !usedLanes[side].has(l)).length
+        return aAvail - bAvail
+      })
+
+      const p = pool.shift()
+      const available = p.lanes.filter(l => !usedLanes[side].has(l))
+
       if (available.length > 0 && teams[side].length < 5) {
         const lane = pickRandom(available)
         usedLanes[side].add(lane)
@@ -102,24 +102,11 @@ export function generateTeams(players) {
       }
     }
 
-    // パス2: 希望レーンが全部埋まっていたメンバーは希望レーン内で再試行
-    // （他のメンバーが配置された後に空きが生まれた場合）
-    const stillUnassigned = []
+    // 希望レーンが全部埋まっていた場合のみ残レーンに配置
     for (const p of unassigned) {
-      const available = getAvailable(p)
-      if (available.length > 0 && teams[side].length < 5) {
-        const lane = pickRandom(available)
-        usedLanes[side].add(lane)
-        teams[side].push({ ...p, lane })
-      } else {
-        stillUnassigned.push(p)
-      }
-    }
-
-    // パス3: それでも入れない場合のみ残レーンに配置（希望外もやむなし）
-    for (const p of stillUnassigned) {
       const rest = LANES.filter(l => !usedLanes[side].has(l))
       if (rest.length === 0 || teams[side].length >= 5) continue
+      // 希望レーンと残レーンの交差を優先
       const preferred = rest.filter(l => p.lanes.includes(l))
       const lane = preferred.length > 0 ? pickRandom(preferred) : pickRandom(rest)
       usedLanes[side].add(lane)
