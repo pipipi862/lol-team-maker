@@ -1,14 +1,14 @@
 // ここにメンバーの名前を入れてください（最大13人）
 export const MEMBERS = [
-  'むつき',
+  'Mutsuki',
   'ぴん',
   'ふゆ',
   'ぬぅ',
-  'えぴ',
-  'もも',
+  'Epi',
+  'momo',
   'みか',
-  'みすと',
-  'ちゃんりー',
+  'mist',
+  'chanrii',
   'うぃっせ',
   'ぐっさん',
   'しのあ',
@@ -20,9 +20,9 @@ export const LANES = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
 export const LANE_ORDER = ['TOP', 'JG', 'MID', 'ADC', 'SUP']
 
 export const LANE_COLORS = {
-  TOP: '#5C6BC0',
-  JG:  '#2E7D32',
+  TOP: '#8d99e0',
+  JG:  '#5aac5e',
   MID: '#C89B3C',
-  ADC: '#C62828',
-  SUP: '#00838F',
+  ADC: '#d84e4e',
+  SUP: '#32b9c5',
 }

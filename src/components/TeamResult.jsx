@@ -93,7 +93,7 @@ export default function TeamResult({ teams: initialTeams }) {
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <p className={styles.label}>チーム分け結果</p>
-        <p className={styles.hint}>（ドラッグ＆ドロップでメンバーを入れ替えできます）</p>
+        <p className={styles.hint}>・ドラッグ＆ドロップでメンバーを入れ替えできます（スマホ不可）</p>
       </div>
 
       <div className={styles.grid}>
