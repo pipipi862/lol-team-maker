@@ -74,11 +74,11 @@ function handleGenerate() {
       isCpu: false,
     }))
 
-  const need = MAX_PLAYERS - players.length
-for (let i = 1; i <= need; i++) {
+// CPU補填
+const need = MAX_PLAYERS - players.length
+for (let i = 0; i < need; i++) {
   players.push({ name: 'AI', lanes: [...LANES], isCpu: true })
 }
-
   const result = generateTeams(players)
   setTeams(result)
 }
