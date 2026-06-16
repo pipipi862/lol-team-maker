@@ -1,7 +1,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   padding: 14px 12px;
   border: 0.5px solid var(--border);
   border-radius: 8px;
@@ -72,7 +72,7 @@
 
 .chipOn {
   border-color: transparent;
-  background: #4a90d9;
+  background: #006f91;
   color: #fff;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .allBtnOn {
-  background: #2a3f5f;
-  color: #7eb3e8;
+  background: #006f91;
+  color: #fff;
   border-color: transparent;
 }

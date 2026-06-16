@@ -111,7 +111,7 @@ for (let i = 0; i < need; i++) {
           選択中: <strong>{selectedCount}</strong> / {MAX_PLAYERS}人
           {selectedCount > 0 && selectedCount < MAX_PLAYERS && (
             <span className={styles.cpuNote}>
-              　→ AI {MAX_PLAYERS - selectedCount}人で補填します
+              　→ AI {MAX_PLAYERS - selectedCount}人を補填します
             </span>
           )}
         </p>
